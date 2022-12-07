@@ -1,0 +1,48 @@
+if (text.toString().length==0){
+                }
+                else if((text.toString().length)-length<=3){
+
+                }
+                else{
+                    //val begin = System.nanoTime()
+                    var autoCompleteReturned = getRequestAutoComplete(text.toString())
+                    //val end = System.nanoTime()
+                    if (autoCompleteReturned.joinToString("")=="Erreur"){
+                    }else{
+                        val song1_song = autoCompleteReturned[0].toString()
+                        val song1_singer = autoCompleteReturned[1].toString()
+
+                        val song2_song = autoCompleteReturned[2].toString()
+                        val song2_singer = autoCompleteReturned[3].toString()
+
+                        val song3_song = autoCompleteReturned[4].toString()
+                        val song3_singer = autoCompleteReturned[5].toString()
+                        if (suggestions.contains("$song1_song ($song1_singer)")){
+
+                        }
+                        else{
+                            suggestions.add("$song1_song ($song1_singer)")
+
+                        }
+                        if (suggestions.contains("$song2_song ($song2_singer)")){
+
+                        }
+                        else{
+                            suggestions.add("$song2_song ($song2_singer)")
+
+                        }
+                        if (suggestions.contains("$song3_song ($song3_singer)")){
+
+                        }
+                        else{
+                            suggestions.add("$song3_song ($song3_singer)")
+
+                        }
+                        //suggestions.add("$song1_song ($song1_singer)")
+                        //suggestions.add("$song2_song ($song2_singer)")
+                        //suggestions.add("$song3_song ($song3_singer)")
+                        arrayAdapter = ArrayAdapter<String>(this@MainActivity, android.R.layout.select_dialog_item, suggestions)
+                        searchBar.setAdapter(arrayAdapter)
+                        searchBar.refreshAutoCompleteResults()
+                        var length = text.toString().length
+                        //Log.i("PSG", ((end-begin).toString()))

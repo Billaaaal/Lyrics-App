@@ -1,0 +1,44 @@
+var counter = 0
+
+
+        fun EditText.debounce(delay: Long, action: (Editable?) -> Unit) {
+            doAfterTextChanged { text ->
+                var counter = getTag(id) as? Int ?: 0
+                handler.removeCallbacksAndMessages(counter)
+                handler.postDelayed(delay, ++counter) { action(text) }
+                setTag(id, counter)
+            }
+        }
+
+
+        searchBar.debounce(500L) { text->
+            if (text.toString().length==0){
+                Toast.makeText(this@MainActivity, "Empty !", Toast.LENGTH_SHORT).show()
+
+            } else{
+                Toast.makeText(this@MainActivity, text.toString(), Toast.LENGTH_SHORT).show()
+
+            }
+
+
+
+
+        }
+        
+        var timer = Timer()
+
+        textField.doAfterTextChanged { text ->
+            timer.cancel() // cancel any previous delay
+
+            timer = Timer() // schedule a new one
+            timer.schedule(500L) {
+                // we are in a background thread here
+                textField.handler.post { Toast.makeText(this@MainActivity, "HILOO", Toast.LENGTH_SHORT).show() }
+
+            }
+        }
+
+        textField.doAfterTextChanged { text ->
+            textField.handler.removeCallbacksAndMessages(counter)
+            textField.handler.postDelayed(500L, ++counter) { Toast.makeText(this@MainActivity, "HILOO", Toast.LENGTH_SHORT).show() }
+        }

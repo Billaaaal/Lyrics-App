@@ -1,0 +1,391 @@
+@file:Suppress("CanBeVal")
+
+package com.example.my_app
+
+import android.os.Build
+import android.os.Bundle
+import android.text.Editable
+//import android.text.TextWatcher
+import android.util.Log
+import android.view.View
+import android.widget.*
+import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.os.postDelayed
+import androidx.core.widget.doAfterTextChanged
+import com.chaquo.python.PyObject
+import com.chaquo.python.Python
+import com.chaquo.python.android.AndroidPlatform
+import com.google.android.material.textfield.TextInputEditText
+import com.squareup.picasso.Picasso
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.concurrent.schedule
+
+//import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+//import io.reactivex.rxjava3.subjects.PublishSubject
+//import kotlinx.coroutines.Dispatchers
+//import kotlinx.coroutines.flow.*
+//import java.util.*
+//import java.util.concurrent.TimeUnit
+//import kotlin.concurrent.schedule
+
+
+class MainActivitye : AppCompatActivity() {
+    @RequiresApi(Build.VERSION_CODES.Q)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+        supportActionBar?.hide()
+        Log.i("THE REQUEST: ", "Working")
+        initPython()
+        //var requestReturned = getRequest()
+        //Log.i("PARIS: ", requestReturned)
+        //var requestReturned = getRequest()
+        val textField = findViewById<TextInputEditText>(R.id.inputfield)
+
+        textField.bringToFront()
+
+        //val clickme = findViewById<Button>(R.id.click_me) //val clickme = findViewById<Button>(R.id.click_me)
+
+        val imageview = findViewById<ImageView>(R.id.thumbnail)
+
+
+
+
+        //val  autoCompleteInput = findViewById<MultiAutoCompleteTextView>(R.id.autoCompleteInput)
+
+        //autoCompleteInput.bringToFront()
+
+        //autoCompleteInput.doAfterTextChanged{
+
+        //    val autoCompleteReturned= getRequestAutoComplete(autoCompleteInput.text.toString())
+
+        //    val he1 = autoCompleteReturned[0].toString()
+        //    val he2 = autoCompleteReturned[1].toString()
+
+        //    Toast.makeText(this, he1, Toast.LENGTH_SHORT).show()
+
+        //}
+
+        //textField.addTextChangedListener(object : TextWatcher {
+        //    override fun beforeTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
+        //    override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {
+
+        //       Toast.makeText(this@MainActivity, "HILOO", Toast.LENGTH_SHORT).show()
+        //   }
+
+        //   override fun afterTextChanged(editable: Editable) {}
+        //})
+
+
+
+
+        val textViewLyrics = findViewById<TextView>(R.id.textViewlyrics)
+        val textViewTitle = findViewById<TextView>(R.id.textViewTitle)
+        val searchBar = findViewById<AutoCompleteTextView>(R.id.Search_bar)
+
+
+
+        //val textViewLyrics = findViewById<TextView>(R.id.textViewlyrics)
+        //val textViewTitle = findViewById<TextView>(R.id.textViewTitle)
+        //val list = listOf<String>()
+
+
+        //val numbers = mutableListOf("one", "two", "three", "four")
+        //numbers.add("five")
+
+        //val a = listOf('1', '2', '3')
+
+        val geeks = listOf("Fowler", "Beck", "Evans")
+
+        //var suggestions: Array<String> = arrayOf("Hello", "shape of you")
+        var suggestions = ArrayList<String>()
+        //suggestions.add()
+
+        var arrayAdapter = ArrayAdapter<String>(this@MainActivity, android.R.layout.select_dialog_item, suggestions)
+        searchBar.setAdapter(arrayAdapter)
+        var timer = Timer()
+
+
+        searchBar.setOnItemClickListener { parent, view, position, id ->
+            val selectedItem = parent.getItemAtPosition(position).toString()
+            Toast.makeText(this@MainActivity, selectedItem, Toast.LENGTH_SHORT).show()
+            //textField.setOnKeyListener(View.OnKeyListener { v, keyCode, event -> //clickme.setOnClickListener {
+            searchBar.clearFocus()
+            //Toast.makeText(this, "Bonsoir", Toast.LENGTH_SHORT).show()
+            //val userInput= textField.text.toString()
+            val requestReturned = getRequest(selectedItem)
+            //var (requestReturned, song_name, singer) = getRequest(userInput)
+            //Toast.makeText(this, requestReturned, Toast.LENGTH_SHORT).show()
+
+
+            //textViewTitle.bringToFront()
+            //textViewLyrics.text = requestReturned.toString() //TextViewLyrics.text = requestReturned.toString()
+
+            //val typeHe = requestReturned::class.simpleName
+
+            //Toast.makeText(this, typeHe, Toast.LENGTH_SHORT).show()
+
+            //Toast.makeText(this, userInput, Toast.LENGTH_SHORT).show()
+
+
+            val lyrics = requestReturned[0].toString()
+            val songName = requestReturned[1].toString()
+            val singer = requestReturned[2].toString()
+            var cover = requestReturned[3].toString()
+            val infos = "${songName} By ${singer}"
+
+            Picasso.get().load(cover).into(imageview)
+            textViewLyrics.text = lyrics //TextViewLyrics.text = requestReturned.toString()
+            textViewTitle.text =  infos//TextViewLyrics.text = requestReturned.toString()
+
+
+            //Log.i("THE REQUEST: ", lyrics)
+
+            //
+
+            //    false
+
+
+
+        }
+
+
+
+        searchBar.doAfterTextChanged { text ->
+            timer.cancel() // cancel any previous delay
+
+            timer = Timer() // schedule a new one
+            timer.schedule(400L) {
+                // we are in a background thread here
+                //textField.handler.post { Toast.makeText(this@MainActivity, text, Toast.LENGTH_SHORT).show() }
+                searchBar.handler.post {
+
+
+                if (text.toString().length==0){
+                    //Toast.makeText(this@MainActivity, "Empty !", Toast.LENGTH_SHORT).show()
+                    textViewLyrics.text = ""
+                    Toast.makeText(this@MainActivity, "Empty !", Toast.LENGTH_SHORT).show()
+
+                    //var empty = true
+
+                } else{
+                    var autoCompleteReturned = getRequestAutoComplete(text.toString())
+                    //Toast.makeText(this@MainActivity, "Python !", Toast.LENGTH_SHORT).show()
+
+                    //Toast.makeText(this@MainActivity, autoCompleteReturned.toString(), Toast.LENGTH_SHORT).show()
+                    //if (autoCompleteReturned[0].toString()=="E"){
+                    if (autoCompleteReturned.joinToString("")=="Erreur"){
+                        Toast.makeText(this@MainActivity, "Error", Toast.LENGTH_SHORT).show()
+                    }else{
+                        val song1_song = autoCompleteReturned[0].toString()
+                        val song1_singer = autoCompleteReturned[1].toString()
+
+                        val song2_song = autoCompleteReturned[2].toString()
+                        val song2_singer = autoCompleteReturned[3].toString()
+
+                        val song3_song = autoCompleteReturned[4].toString()
+                        val song3_singer = autoCompleteReturned[5].toString()
+
+                        //val suggestions = arrayOf(song1_song +" By "+ song1_singer, song2_song +" By "+     song2_singer)
+
+                        suggestions.add("$song1_song ($song1_singer)")
+                        suggestions.add("$song2_song ($song2_singer)")
+                        suggestions.add("$song3_song ($song3_singer)")
+
+
+                        arrayAdapter = ArrayAdapter<String>(this@MainActivity, android.R.layout.select_dialog_item, suggestions)
+                        searchBar.setAdapter(arrayAdapter)
+                        searchBar.refreshAutoCompleteResults()
+
+                        //textViewLyrics.text = "Python !"
+
+                        //textViewLyrics.text = "$song1_song ($song1_singer)\n"+"$song2_song ($song2_singer)\n"+"$song3_song ($song3_singer)\n"
+
+                    }
+
+                }
+
+                }
+            }
+        }
+
+
+
+
+
+
+        //textField.setOnKeyListener(View.OnKeyListener { v, keyCode, event -> //clickme.setOnClickListener {
+        //    //textField.clearFocus()
+        //    //Toast.makeText(this, "Bonsoir", Toast.LENGTH_SHORT).show()
+        //    val userInput= textField.text.toString()
+        //    val requestReturned = getRequest(userInput)
+        //    //var (requestReturned, song_name, singer) = getRequest(userInput)
+        //    //Toast.makeText(this, requestReturned, Toast.LENGTH_SHORT).show()
+
+
+        //    textViewTitle.bringToFront()
+            //textViewLyrics.text = requestReturned.toString() //TextViewLyrics.text = requestReturned.toString()
+
+            //val typeHe = requestReturned::class.simpleName
+
+            //Toast.makeText(this, typeHe, Toast.LENGTH_SHORT).show()
+
+            //Toast.makeText(this, userInput, Toast.LENGTH_SHORT).show()
+
+
+        //    val lyrics = requestReturned[0].toString()
+        //    val songName = requestReturned[1].toString()
+        //    val singer = requestReturned[2].toString()
+        //    var cover = requestReturned[3].toString()
+        //   val infos = "${songName} By ${singer}"
+
+        //    textViewLyrics.text = lyrics //TextViewLyrics.text = requestReturned.toString()
+        //    textViewTitle.text =  infos//TextViewLyrics.text = requestReturned.toString()
+        //   Picasso.get().load(cover).into(imageview)
+
+            //Log.i("THE REQUEST: ", lyrics)
+
+            //
+
+        //    false
+
+            //Toast.makeText(this, cover_, Toast.LENGTH_SHORT).show()
+
+            //Toast.makeText(this, singer, Toast.LENGTH_SHORT).show()
+
+
+
+
+
+
+
+
+        //})
+
+
+        var counter = 0
+
+
+        fun EditText.debounce(delay: Long, action: (Editable?) -> Unit) {
+            doAfterTextChanged { text ->
+                var counter = getTag(id) as? Int ?: 0
+                handler.removeCallbacksAndMessages(counter)
+                handler.postDelayed(delay, ++counter) { action(text) }
+                setTag(id, counter)
+            }
+        }
+        //var empty = false
+
+        textField.debounce(300L) { text->
+            //if(empty){
+
+           // }
+            if (text.toString().length==0){
+                //Toast.makeText(this@MainActivity, "Empty !", Toast.LENGTH_SHORT).show()
+                textViewLyrics.text = ""
+
+                //var empty = true
+
+            } else{
+                //Toast.makeText(this@MainActivity, text.toString(), Toast.LENGTH_SHORT).show()
+                var autoCompleteReturned = getRequestAutoComplete(text.toString())
+
+                //Toast.makeText(this@MainActivity, autoCompleteReturned.toString(), Toast.LENGTH_SHORT).show()
+                //if (autoCompleteReturned[0].toString()=="E"){
+                if (autoCompleteReturned.joinToString("")=="Erreur"){
+                    Toast.makeText(this@MainActivity, "Error", Toast.LENGTH_SHORT).show()
+                }else{
+                    val song1_song = autoCompleteReturned[0].toString()
+                    val song1_singer = autoCompleteReturned[1].toString()
+
+                    val song2_song = autoCompleteReturned[2].toString()
+                    val song2_singer = autoCompleteReturned[3].toString()
+
+                    val song3_song = autoCompleteReturned[4].toString()
+                    val song3_singer = autoCompleteReturned[5].toString()
+
+                    //val suggestions = arrayOf(song1_song +" By "+ song1_singer, song2_song +" By "+     song2_singer)
+
+
+
+                    //textViewLyrics.text = "$song1_song ($song1_singer)\n"+"$song2_song ($song2_singer)\n"+"$song3_song ($song3_singer)\n"
+
+                }
+
+
+
+
+
+
+
+            }
+
+
+
+
+        }
+
+
+
+        //val textField = findViewById<Button>(R.id.inputfield).setOnClickListener {
+
+
+
+        //textField.doAfterTextChanged {
+            // Pass text to ViewModel for searching...
+        //}
+        //SearchViewE =  findViewById<SearchView>(R.id.searchbar)
+
+
+
+
+    }
+
+    private fun initPython(){
+        if (!Python.isStarted()){
+            Python.start(AndroidPlatform(this))
+
+        }
+
+    }
+
+    private fun getRequest(userInput: String): MutableList<PyObject> {
+        val python = Python.getInstance()
+        val pythonFile = python.getModule("request_to_do")
+        return pythonFile.callAttr("main_request", userInput).asList() //return pythonFile.callAttr("main_request", userInput).toString()
+
+
+
+
+    }
+
+    private fun getRequestAutoComplete(autoCompleteInput: String): MutableList<PyObject> {
+        val python = Python.getInstance()
+        val pythonFile = python.getModule("request_to_do")
+        //var hee = pythonFile.callAttr("auto_complete", autoCompleteInput).toString()
+        return pythonFile.callAttr("auto_complete", autoCompleteInput).asList() //return pythonFile.callAttr("main_request", userInput).toString()
+
+
+
+
+    }}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
